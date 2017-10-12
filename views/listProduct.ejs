@@ -10,21 +10,21 @@
     <script>
     function addToCard(btn) {
         btn.parentNode.parentNode.className = "selected";
-        var id = $("tr.selected td:first").html();
+        var _id = $("tr.selected td:first").html().replace(/\s+/g, '');
         $.ajax({
             dataType: 'text',
             type: 'POST',
             url: '/cart',
-            data: { productId: id },
+            data: { productId: _id },
             error: function(res) {
                 btn.parentNode.parentNode.className = "";
             },
             success: function(res) {
                 // Do something with the result
-
                 var json = JSON.parse(res);
                 var totalCount = 0;
-                for (var id in json) {
+                var id;
+                for (id in json) {
                     totalCount += json[id].qty;
                 }
                 document.getElementById("total-count").innerHTML = totalCount;
@@ -41,11 +41,36 @@
             type: 'DELETE',
             success: function(res) {
                 // Do something with the result
+
                 var json = JSON.parse(res);
                 consolse.log(json[0].name);
             }
         });
         btn.parentNode.parentNode.className = "";
+    }
+
+    function search(name) {
+        if (name != '') {
+            $.ajax({
+                type: 'GET',
+                url: '/list/' + name,
+                success: function(res) {
+                    console.log(res.length);
+                    var str = '';
+                    for (var i = 0; i < res.length; i++) {
+                        str += '<tr><td>' + res[i].id + '</td>';
+                        str += '<td>' + res[i].name + '</td>';
+                        str += '<td>' + res[i].description + '</td>';
+                        str += '<td>' + res[i].price + '</td>';
+                        str += '<td><button class="add-to-cart btn btn-primary" onclick="addToCard(this)">Add to card</button></td></tr>';
+                    }
+                    $('tbody').empty().append(str);
+
+                }
+            });
+        } else
+            location.reload();
+
     }
     </script>
 </head>
@@ -53,7 +78,7 @@
 <body>
     <div class="generic-container">
         <div class="row">
-
+            Search<input type="search" name="search" id="search" onkeyup="search(this.value)"></input>
             <div class="panel-heading col-xs-10 col-md-11"><span class="lead">List of Documents </span></div>
             <div class="col-xs-8 col-md-1">
                 <a class="btn btn-primary" data-toggle="modal" href="/cart">Cart (<span id="total-count">
@@ -78,16 +103,16 @@
                         <%for(var i=0; i < data.length; i++) { %>
                             <tr>
                                 <td>
-                                    <%= data[i].id %>
+                                    <%=    data[i].id %>
                                 </td>
                                 <td>
-                                    <%= data[i].name %>
+                                    <%=    data[i].name %>
                                 </td>
                                 <td>
-                                    <%= data[i].description %>
+                                    <%=    data[i].description %>
                                 </td>
                                 <td>
-                                    <%= data[i].price %>
+                                    <%=    data[i].price %>
                                 </td>
                                 <td>
                                     <button class="add-to-cart btn btn-primary" onclick="addToCard(this)">Add to card</button>
@@ -103,8 +128,8 @@
     </div>
     <p style="color: red;">
         <% if (typeof errMes !== 'undefined') {%>
-            <%= errMes%>
-                <% }%>
+            +errMes%>
+            <% }%>
     </p>
 </body>
 

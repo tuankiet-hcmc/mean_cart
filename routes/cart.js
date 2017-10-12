@@ -48,6 +48,7 @@ router.post('/', function (req, res) {
         
         //Display the cart for the user
         //res.redirect('/cart');
+        console.log(cart);
         res.status(201).json(cart);
     });
      

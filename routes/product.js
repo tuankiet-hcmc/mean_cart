@@ -57,6 +57,33 @@ router.get('/list', function(req, res) {
     var item = {};
 
 })
+router.get('/list/:name', function(req, res) {
+    var cart = req.session.cart,
+        total = 0;
+    for (var item in cart) {
+        total += cart[item].qty;
+    }
+    Product.find({ name: req.params.name }, function(err, docs) {
+        if (err) {
+            handleError(res, err.message, "Failed to get products.");
+        } else {
+            if (docs.length == 0) {
+                Product.find({ $text: { $search: req.params.name } }, function(err, docs) {
+                    if (err) {
+                        handleError(res, err.message, "Failed to get products.");
+                    } else {
+                        res.status(200).json(docs);
+                    }
+                });
+            } else
+                res.status(200).json(docs);
+        }
+    });
+
+
+    var item = {};
+
+})
 router.delete("/list/:id", function(req, res) {
     Product.findOne({ _id: mongoose.Types.ObjectId(req.params.id) }, function(err, model) {
         if (err) {
